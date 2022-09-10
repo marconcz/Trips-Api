@@ -1,14 +1,16 @@
 # Trips-API
 Servicios de viaje para la aplicación.
 
-** Instalar poetry **
+**Instalar poetry**
 1. curl -sSL https://install.python-poetry.org | python3 -
 2. Agregar a env var PATH del OS
 
-** Configurar venv al directorio raiz **
+**Configurar venv al directorio raiz**
 1. poetry config virtualenvs.in-project true
 
-** Ejectuar **
-1. poetry run uvicorn main:app
+**Ejectuar**
+# 1. poetry run uvicorn main:app
+1. poetry run python3 -m src.main
+
 
 - Se requiere tener python3 instalado
