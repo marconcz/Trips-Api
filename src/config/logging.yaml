@@ -27,5 +27,5 @@ loggers:
         level: WARNING
 
     root:
-        handlers: [console]
+        handlers: [file]
         level: WARNING
