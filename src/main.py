@@ -3,11 +3,11 @@ from fastapi import FastAPI
 from uvicorn import Config, Server
 
 # Local application imports
-from src import trips
+from src.router import trips
 
 def app() -> None:
     app = FastAPI()
-    app.include_router(trips.router)
+    app.include_router(router=trips.router)
     return app
 
 def main() -> None:
