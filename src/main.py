@@ -1,28 +1,18 @@
-# Third party imports
-from fastapi import FastAPI
-from uvicorn import Config, Server
+# Standard library imports
+from logging import getLogger
 
 # Local application imports
-from src.router import trips
-from src.config import env
-
-
-def app() -> None:
-    app = FastAPI()
-    app.include_router(router=trips.router)
-    return app
-
+from src.config import logging
+from src.config import server
 
 def main() -> None:
-    config = Config(app="src.main:app",
-                    host=env.HOST, port=env.PORT,
-                    reload=True, factory=True)
-    server = Server(config)
+    logging.set_config()
     server.run()
 
 
 if __name__ == "__main__":
+    logger = getLogger("root")
     try:
         main()
     except BaseException as error:
-        print(f"Unexpected {error=}, {type(error)=}")
+        logger.error(f"Unexpected {error=}, {type(error)=}")

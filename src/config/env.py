@@ -1,9 +1,11 @@
 # Standard library imports
 import os
+from logging import getLogger
 
 # Third party imports
 from dotenv import load_dotenv
 
+logger = getLogger("root")
 load_dotenv()
 
 
@@ -12,7 +14,7 @@ def set_host(host: str) -> str:
 
     if not host:
         host = default_host
-        print("Empty host value, default taken -", default_host)
+        logger.warning(f"Empty host value, default taken - {default_host}")
     return default_host
 
 
@@ -22,8 +24,7 @@ def set_port(port: str) -> int:
     try:
         default_port = int(port)
     except ValueError as error:
-        print(f"{error=}, {type(error)=}")
-        print("Invalid port value, default taken -", default_port)
+        logger.warning(f"Invalid port value, default taken - {default_port}")
     return default_port
 
 
