@@ -2,7 +2,7 @@ version: 1
 
 formatters:
     standard:
-        format: '%(asctime)s %(levelname)-8s %(name)-15s %(message)s'
+        format: '%(asctime)s %(levelname)-1s %(name)-6s %(message)s'
         datefmt: '%Y-%m-%d %H:%M:%S'
 
     brief:
@@ -22,6 +22,10 @@ handlers:
         backupCount: 3
 
 loggers:
+    __main__:
+        handlers: [console]
+        level: WARNING
+
     root:
         handlers: [console]
         level: WARNING

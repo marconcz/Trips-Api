@@ -2,17 +2,17 @@
 from logging import getLogger
 
 # Local application imports
-from src.config import logging
 from src.config import server
+
+logger = getLogger(__name__)
 
 
 def main() -> None:
-    logging.set_config()
     server.run()
 
 
 if __name__ == "__main__":
-    logger = getLogger("root")
+
     try:
         main()
     except BaseException as error:

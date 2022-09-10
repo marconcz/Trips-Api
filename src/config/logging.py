@@ -3,6 +3,7 @@ import logging
 from yaml import safe_load
 from logging.config import dictConfig
 
+
 def set_config():
     FPATH = "src/config/logging.yaml"
     FMODE = "r"
