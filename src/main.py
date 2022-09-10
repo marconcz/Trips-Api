@@ -4,6 +4,7 @@ from uvicorn import Config, Server
 
 # Local application imports
 from src.router import trips
+from src.config import env
 
 
 def app() -> None:
@@ -14,11 +15,14 @@ def app() -> None:
 
 def main() -> None:
     config = Config(app="src.main:app",
-                    host="localhost", port=5000,
+                    host=env.HOST, port=env.PORT,
                     reload=True, factory=True)
     server = Server(config)
     server.run()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BaseException as error:
+        print(f"Unexpected {error=}, {type(error)=}")
