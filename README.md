@@ -10,7 +10,5 @@ Servicios de viaje para la aplicación.
 
 **Ejectuar**
 # 1. poetry run uvicorn main:app
-1. poetry run python3 -m src.main
-
-
-- Se requiere tener python3 instalado
+# 1. poetry run python3 -m src.main
+1. poetry run start
