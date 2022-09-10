@@ -8,5 +8,12 @@ Servicios de viaje para la aplicación.
 **Configurar venv al directorio raiz**
 1. poetry config virtualenvs.in-project true
 
-**Ejectuar**
-1. poetry run start
+## Scripts
+**Levantar servidor**
+- poetry run start
+
+**Ejecutar pruebas**
+- poetry run test
+
+**Ejecutar linter**
+- poetry run lint
