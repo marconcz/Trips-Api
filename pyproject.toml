@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "trips-api"
+version = "0.1.0"
+description = "Microservicio de viajes"
+authors = ["Daniel Lovera <daanilo2497@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.82.0"
+uvicorn = {extras = ["standard"], version = "^0.18.3"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
