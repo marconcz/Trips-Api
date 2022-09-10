@@ -9,6 +9,4 @@ Servicios de viaje para la aplicación.
 1. poetry config virtualenvs.in-project true
 
 **Ejectuar**
-# 1. poetry run uvicorn main:app
-# 1. poetry run python3 -m src.main
 1. poetry run start
