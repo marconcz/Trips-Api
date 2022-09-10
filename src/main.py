@@ -5,6 +5,7 @@ from logging import getLogger
 from src.config import logging
 from src.config import server
 
+
 def main() -> None:
     logging.set_config()
     server.run()

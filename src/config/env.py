@@ -23,7 +23,7 @@ def set_port(port: str) -> int:
 
     try:
         default_port = int(port)
-    except ValueError as error:
+    except ValueError:
         logger.warning(f"Invalid port value, default taken - {default_port}")
     return default_port
 
