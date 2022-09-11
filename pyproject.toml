@@ -10,10 +10,18 @@ packages = [
     { include = "script", from = "src" }
 ]
 
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src",
+]
+
 [tool.poetry.dependencies]
 python = "^3.8"
 fastapi = "^0.82.0"
 uvicorn = {extras = ["standard"], version = "^0.18.3"}
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^0.971"
 
 [tool.poetry.scripts]
 format = "script.poetry:format"
@@ -21,9 +29,6 @@ reformat = "script.poetry:reformat"
 lint = "script.poetry:lint"
 start = "script.poetry:start"
 test = "script.poetry:test"
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^0.971"
 
 [build-system]
 requires = ["poetry-core"]
