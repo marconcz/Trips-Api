@@ -18,11 +18,11 @@ def reformat() -> None:
 
 def lint() -> None:
     check_call(["flake8", "src", "test"])
-    # check_call(["mypy", "src", "test"])
+    check_call(["mypy", "src", "test"])
 
 
 def start() -> None:
-    check_call(["python3", "-m", "src.main"])
+    check_call(["python", "-m", "src.main"])
 
 
 def test() -> None:

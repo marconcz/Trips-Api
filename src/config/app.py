@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from src.router import trips
 
 
-def run() -> None:
+def run():
     app = FastAPI()
     app.include_router(router=trips.router)
     return app
