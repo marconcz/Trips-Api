@@ -1,7 +1,9 @@
 # Third party imports.
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
+# Adds higher directory to python modules path
+import sys
+sys.path.append("../..") 
 # Local application imports
 from src.router.trips import router
 
