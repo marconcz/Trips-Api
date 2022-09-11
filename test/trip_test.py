@@ -1,4 +1,4 @@
-# Third party imports
+# Third party imports.
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
