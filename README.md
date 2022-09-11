@@ -5,8 +5,9 @@ Servicios de viaje para la aplicación.
 1. curl -sSL https://install.python-poetry.org | python3 -
 2. Agregar a env var PATH del OS
 
-**Configurar venv al directorio raiz**
+**Instalar dependencias**
 1. poetry config virtualenvs.in-project true
+2. poetry install
 
 ## Scripts
 **Levantar servidor**
@@ -17,3 +18,9 @@ Servicios de viaje para la aplicación.
 
 **Ejecutar linter**
 - poetry run lint
+
+**Revisar formateo del codigo codigo**
+- poetry run format
+
+**Refactorizar el codigo**
+- poetry run reformat
