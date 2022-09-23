@@ -10,7 +10,7 @@ logger = getLogger("root")
 
 
 def set_host(host: str) -> str:
-    default_host = "localhost"
+    default_host = "127.0.0.1"
 
     if not host:
         host = default_host

@@ -6,6 +6,9 @@ COPY pyproject.toml /trips-api
 COPY README.md /trips-api 
 WORKDIR /trips-api
 
+ENV HOST=
+ENV PORT=
+EXPOSE 7777
 ENV PYTHONPATH=${PYTHONPATH}:${PWD} 
 
 RUN pip3 install poetry
