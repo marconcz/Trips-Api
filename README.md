@@ -24,3 +24,10 @@ Servicios de viaje para la aplicación.
 
 **Refactorizar el codigo**
 - poetry run reformat
+
+# ---------------------------------------------------CORRER CON DOCKER---------------------------------------------------#
+**Parado en el directorio trips-api : Crear imagen con docker**
+- docker build . -t python-image
+
+**Correr imagen de docker y abrir consola**
+- docker run -i -t python-image /bin/bash
