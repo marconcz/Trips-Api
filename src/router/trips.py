@@ -1,6 +1,5 @@
 # Third party imports
 from fastapi import APIRouter 
-from fastapi.encoders import jsonable_encoder
 #from service.price_rules import driver, passenger, trip, rule
 from fastapi.encoders import jsonable_encoder
 # Define constants
