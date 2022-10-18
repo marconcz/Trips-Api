@@ -10,7 +10,7 @@ logger = getLogger("root")
 
 
 def set_host(host: str) -> str:
-    default_host = "127.0.0.1"
+    default_host = "0.0.0.0"
 
     if not host:
         host = default_host
@@ -19,7 +19,7 @@ def set_host(host: str) -> str:
 
 
 def set_port(port: str) -> int:
-    default_port = 7777
+    default_port = 8000
 
     try:
         default_port = int(port)

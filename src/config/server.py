@@ -5,11 +5,11 @@ from uvicorn import Config, Server
 from src.config import env
 
 
-def run():
+def run(PORT):
     config = Config(
         app="src.config.app:run",
         host=env.HOST,
-        port=env.PORT,
+        port=PORT,
         reload=True,
         factory=True,
     )

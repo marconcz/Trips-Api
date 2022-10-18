@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-slim
 
 #RUN mkdir -p api/ 
 #WORKDIR /api/
@@ -8,11 +8,10 @@ COPY . /trips-api/
 COPY .env .
 WORKDIR /trips-api
 
-ENV HOST=
-ENV PORT=
-EXPOSE 7777
+
 ENV PYTHONPATH=${PYTHONPATH}:${PWD} 
 
 RUN pip3 install poetry
-RUN poetry config virtualenvs.create true
+RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --no-ansi
+CMD python3 -m src.main --port $PORT

@@ -22,7 +22,7 @@ def lint() -> None:
 
 
 def start() -> None:
-    check_call(["python", "-m", "src.main"])
+    check_call(["python3", "-m", "src.main"])
 
 
 def test() -> None:
