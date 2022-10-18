@@ -5,7 +5,6 @@ FROM python:3.8-slim
 #RUN printf "HOST=\nPORT=" >.env
 RUN mkdir -p /trips-api 
 COPY . /trips-api/
-COPY .env .
 WORKDIR /trips-api
 
 
