@@ -8,7 +8,18 @@ on:
       - '**'
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Build docker images
+        run: docker build -f Dockerfile.test . --rm  -t app-flask-test
+      - name: Run tests
+        run: docker run --rm  app-flask-test
   build_deploy_production:
+    if: github.ref == 'master'
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,5 +27,5 @@ jobs:
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }} # your  heroku api key
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }} # you aplication name
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }} # your heroku email
           usedocker: true
