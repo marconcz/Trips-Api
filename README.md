@@ -25,7 +25,7 @@ Servicios de viaje para la aplicación.
 **Refactorizar el codigo**
 - poetry run reformat
 
-# ---------------CORRER CON DOCKER--------------- - #
+# ---------------CORRER CON DOCKER---------------- #
 **Parado en el directorio trips-api : Crear imagen con docker**
 - docker build . -t python-image
 
