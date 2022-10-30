@@ -13,11 +13,10 @@ def bd_connection():
         cursor = conn.cursor()
              
         # Creating table as per requirement
-        sql = '''CREATE TABLE IF NOT EXISTS TripsTable(
-                    trip_id SERIAL PRIMARY KEY,
-                    driver_id VARCHAR(255),
-                    client_id VARCHAR(255) NOT NULL
-        )'''
+        sql = '''CREATE TABLE IF NOT EXISTS TRIPSTABLE(TRIP_ID SERIAL PRIMARY KEY,
+										DRIVER_ID VARCHAR(255),
+										CLIENT_ID VARCHAR(255) UNIQUE NOT NULL,
+									    PRICE NUMERIC)'''
         cursor.execute(sql)
         print("Table created successfully........")
         conn.commit()
@@ -30,7 +29,7 @@ def bd_connection():
     except Exception as error:
         print(error)
 #Register a trip with a client when trip´s accepted, without driver
-def register_trip(client_id: str):
+def register_trip(client_id: str, price: float):
     try:
         conn = connect(host=secret.host,
             database=secret.database,
@@ -40,11 +39,43 @@ def register_trip(client_id: str):
         )
         cursor = conn.cursor()
 
-        postgres_insert_query = """INSERT INTO TripsTable(trip_id,client_id)\
-                                VALUES(DEFAULT,'{0}');""".format(client_id)
+        postgres_insert_query = """INSERT INTO TripsTable(trip_id,client_id,price,status)\
+                                VALUES(DEFAULT,'{0}','{1}','waiting')
+                                RETURNING trip_id;""".format(client_id,price)
         cursor.execute(postgres_insert_query)
         conn.commit()
-        return cursor.rowcount
+        trip_id = cursor.fetchone()[0]
+        return trip_id
+    except Exception as error:
+        print("Error:",error)
+        return "An error occurred"
+    finally:
+    # closing database connection.
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed")
+
+#
+def search_trip_without_driver():
+    try:
+        conn = connect(host=secret.host,
+            database=secret.database,
+            user=secret.user,
+            password=secret.password,
+            port=secret.port
+        )
+        cursor = conn.cursor()
+
+        postgres_insert_query = """SELECT
+                                    trip_id, price 
+                                    FROM    TripsTable
+                                    WHERE   driver_id IS NULL and
+									        status = 'waiting'
+                                    LIMIT 1;"""
+        cursor.execute(postgres_insert_query)
+        conn.commit()
+        return cursor.fetchone() #Return 1 row in cursor rows
     except Exception as error:
         print("Error:",error)
         return "An error occurred"
@@ -66,9 +97,12 @@ def register_driver(trip_id, driver_id: str):
         )
         cursor = connection.cursor()
         # Update single record now
-        sql_update_query = """Update TripsTable set \
-                            driver_id = '{0}' where trip_id = '{1}'""".format(driver_id,trip_id)
+        sql_update_query = """UPDATE tripstable
+                                SET driver_id = '{0}',
+	                                status = 'accepted'
+                                WHERE trip_id = '{1}' and status = 'waiting';""".format(driver_id,trip_id)
         cursor.execute(sql_update_query)
+        
         connection.commit()
         return cursor.rowcount
     except Exception as error:
