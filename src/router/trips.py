@@ -2,7 +2,7 @@
 from unittest import result
 from fastapi import APIRouter 
 #Our imports
-from src.repository.trips_bbdd import bd_connection,register_trip,check,register_driver
+from src.repository.trips_bbdd import bd_connection,register_trip,check,register_driver, search_trip_without_driver
 
 # Define constants
 PRICE_PER_KILOMETER = 5
@@ -27,15 +27,21 @@ async def price_calculator(distance: float):
 #When a Client accept the travel´s price, we save the travel ID
 #in a postgreSQL database waiting for a driver
 @router.post("/accept-client-trip")
-async def accept_client_trip(client_id: str):
-    operation = register_trip(client_id)
-    return {"status": operation} 
+async def accept_client_trip(client_id: str, price: float):
+    operation = register_trip(client_id, price)
+    return {"trip_id": operation} 
 
 #If a driver is looking for doing a trip
+@router.get("/search-trip")
+async def search_trip():
+    operation = search_trip_without_driver()
+    return {"trip_id": operation[0], "price": operation[1]}
+
+#If a driver is looking for accept a trip
 @router.post("/accept-driver-trip")
 async def accept_driver_trip(trip_id, driver_id: str):
-    operation = register_driver(trip_id, driver_id)
-    return {"status": operation}
+    record = register_driver(trip_id, driver_id)
+    return {"status": record}
 
 #Debug method to check DD.BB structure
 @router.get("/check-db")
