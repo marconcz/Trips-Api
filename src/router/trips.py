@@ -2,7 +2,7 @@
 from unittest import result
 from fastapi import APIRouter 
 #Our imports
-from src.repository.trips_bbdd import bd_connection,register_trip,check,register_driver, search_trip_without_driver
+from src.repository.trips_bbdd import bd_connection, get_driver,register_trip,check,register_driver, search_trip_without_driver
 
 # Define constants
 PRICE_PER_KILOMETER = 5
@@ -42,6 +42,12 @@ async def search_trip():
 async def accept_driver_trip(trip_id, driver_id: str):
     record = register_driver(trip_id, driver_id)
     return {"status": record}
+
+#If a client answer about a driver was found
+@router.post("/driver")
+async def check_driver_status(trip_id):
+    record = get_driver(trip_id)
+    return {"driver_status": record}   
 
 #Debug method to check DD.BB structure
 @router.get("/check-db")
