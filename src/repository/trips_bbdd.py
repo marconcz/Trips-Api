@@ -57,6 +57,37 @@ def register_trip(client_id: str, price: float):
             print("PostgreSQL connection is closed")
 
 #
+def get_driver(trip_id):
+    try:
+        conn = connect(host=secret.host,
+            database=secret.database,
+            user=secret.user,
+            password=secret.password,
+            port=secret.port
+        )
+        cursor = conn.cursor()
+
+        postgres_insert_query = """SELECT driver_id FROM TripsTable\
+                                    WHERE trip_id={0};""".format(trip_id)
+        cursor.execute(postgres_insert_query)
+        driver_id = cursor.fetchone()[0]
+        if (cursor.rowcount == 1 and driver_id is not None):
+            result = 'driver_found'
+        else:
+            result = 'not_found'
+        conn.commit()
+  
+    except Exception as error:
+        print("Error:",error)
+        return "An error occurred"
+    finally:
+    # closing database connection.
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed")
+        return result
+#
 def search_trip_without_driver():
     try:
         conn = connect(host=secret.host,
