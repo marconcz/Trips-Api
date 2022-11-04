@@ -11,7 +11,7 @@ def bd_connection():
             port=secret.port
         )
         cursor = conn.cursor()
-             
+        # New comment 
         # Creating table as per requirement
         sql = '''CREATE TABLE IF NOT EXISTS TRIPSTABLE(TRIP_ID SERIAL PRIMARY KEY,
 										DRIVER_ID VARCHAR(255),
