@@ -2,14 +2,18 @@ from psycopg2 import connect
 import src.repository.secret as secret
 
 # use connect function to establish the connection
-def bd_connection():
-    try:
-        conn = connect(host=secret.host,
+def get_con():
+    conn = connect(host=secret.host,
             database=secret.database,
             user=secret.user,
             password=secret.password,
             port=secret.port
         )
+    return conn
+
+def bd_connection():
+    try:
+        conn = get_con()
         cursor = conn.cursor()
         # New comment 
         # Creating table as per requirement
@@ -31,12 +35,7 @@ def bd_connection():
 #Register a trip with a client when trip´s accepted, without driver
 def register_trip(client_id: str, price: float):
     try:
-        conn = connect(host=secret.host,
-            database=secret.database,
-            user=secret.user,
-            password=secret.password,
-            port=secret.port
-        )
+        conn = get_con()
         cursor = conn.cursor()
 
         postgres_insert_query = """INSERT INTO TripsTable(trip_id,client_id,price,status)\
@@ -59,12 +58,7 @@ def register_trip(client_id: str, price: float):
 #
 def get_driver(trip_id):
     try:
-        conn = connect(host=secret.host,
-            database=secret.database,
-            user=secret.user,
-            password=secret.password,
-            port=secret.port
-        )
+        conn = get_con()
         cursor = conn.cursor()
 
         postgres_insert_query = """SELECT driver_id FROM TripsTable\
@@ -90,12 +84,7 @@ def get_driver(trip_id):
 #
 def search_trip_without_driver():
     try:
-        conn = connect(host=secret.host,
-            database=secret.database,
-            user=secret.user,
-            password=secret.password,
-            port=secret.port
-        )
+        conn = get_con()
         cursor = conn.cursor()
 
         postgres_insert_query = """SELECT
@@ -120,12 +109,7 @@ def search_trip_without_driver():
 #
 def register_driver(trip_id, driver_id: str):
     try:
-        connection = connect(host=secret.host,
-            database=secret.database,
-            user=secret.user,
-            password=secret.password,
-            port=secret.port
-        )
+        connection = get_con()
         cursor = connection.cursor()
         # Update single record now
         sql_update_query = """UPDATE tripstable
@@ -148,12 +132,7 @@ def register_driver(trip_id, driver_id: str):
 #Method to debug TripsTable
 def check():
     try:
-        connection = connect(host=secret.host,
-            database=secret.database,
-            user=secret.user,
-            password=secret.password,
-            port=secret.port
-        )
+        connection = get_con()
         cursor = connection.cursor()
         postgreSQL_select_Query = "select * from TripsTable"
  
