@@ -20,7 +20,14 @@ def bd_connection():
         sql = '''CREATE TABLE IF NOT EXISTS TRIPSTABLE(TRIP_ID SERIAL PRIMARY KEY,
 										DRIVER_ID VARCHAR(255),
 										CLIENT_ID VARCHAR(255) UNIQUE NOT NULL,
-									    PRICE NUMERIC)'''
+									    PRICE NUMERIC,
+                                        STATUS VARCHAR(20),
+                                        LONGITUDE FLOAT,
+                                        LATITUDE FLOAT,
+                                        DEST_LONGITUDE FLOAT,
+                                        DEST_LATITUDE FLOAT,
+                                        DRIVER_LONGITUDE FLOAT,
+                                        DRIVER_LATITUDE FLOAT)'''
         cursor.execute(sql)
         print("Table created successfully........")
         conn.commit()
@@ -32,15 +39,64 @@ def bd_connection():
         #print("Connection with Heroku_DDBB is OK")
     except Exception as error:
         print(error)
+# init a trip setting its status to Running
+def init_trip(trip_id):
+    try:
+        conn = get_con()
+        cursor = conn.cursor()
+        # New comment 
+        # Creating table as per requirement
+        sql = """UPDATE tripstable
+                            SET status = 'running'
+                            WHERE trip_id = '{0}';""".format(trip_id)
+        cursor.execute(sql)
+        conn.commit()
+        result = cursor.statusmessage
+        if (result == "UPDATE 1"):
+            result = "Running"
+        else:
+            result = "Failed updating"
+        # Closing the connection
+        conn.close()
+        return result
+
+        #print("Connection with Heroku_DDBB is OK")
+    except Exception as error:
+        print(error)
+#Get trip status
+def get_trip_status(trip_id):
+    try:
+        conn = get_con()
+        cursor = conn.cursor()
+        # New comment 
+        # Creating table as per requirement
+        sql = '''SELECT status FROM tripstable \
+            WHERE trip_id = {0}'''.format(trip_id)
+        cursor.execute(sql)
+        return cursor.fetchone()[0]
+        # Closing the connection
+        conn.close()
+
+
+        #print("Connection with Heroku_DDBB is OK")
+    except Exception as error:
+        print(error)
 #Register a trip with a client when trip´s accepted, without driver
-def register_trip(client_id: str, price: float):
+def register_trip(client_id: str, price: float, user_lat: float, user_long: float, dest_lat: float, dest_long: float):
     try:
         conn = get_con()
         cursor = conn.cursor()
 
-        postgres_insert_query = """INSERT INTO TripsTable(trip_id,client_id,price,status)\
-                                VALUES(DEFAULT,'{0}','{1}','waiting')
-                                RETURNING trip_id;""".format(client_id,price)
+        postgres_insert_query = """INSERT INTO TripsTable(trip_id,\
+                                                            client_id,\
+                                                            price,\
+                                                            status,\
+                                                            latitude,\
+                                                            longitude,\
+                                                            dest_latitude,\
+                                                            dest_longitude)\
+                                VALUES(DEFAULT,'{0}','{1}','waiting','{2}','{3}','{4}','{5}')\
+                                RETURNING trip_id;""".format(client_id,price,user_lat,user_long,dest_lat,dest_long)
         cursor.execute(postgres_insert_query)
         conn.commit()
         trip_id = cursor.fetchone()[0]
@@ -54,7 +110,31 @@ def register_trip(client_id: str, price: float):
             cursor.close()
             conn.close()
             print("PostgreSQL connection is closed")
+#
+def get_driver_pos(trip_id):
+    try:
+        conn = get_con()
+        cursor = conn.cursor()
 
+        postgres_select_query = """SELECT driver_latitude FROM TripsTable\
+                                    WHERE trip_id={0};""".format(trip_id)
+        cursor.execute(postgres_select_query)
+        result = [cursor.fetchone()]
+        postgres_select_query = """SELECT driver_longitude FROM TripsTable\
+                                    WHERE trip_id={0};""".format(trip_id)
+        cursor.execute(postgres_select_query)
+        result.append
+
+    except Exception as error:
+        print("Error:",error)
+        return "An error occurred"
+    finally:
+    # closing database connection.
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed")
+        return result
 #
 def get_driver(trip_id):
     try:
@@ -88,7 +168,7 @@ def search_trip_without_driver():
         cursor = conn.cursor()
 
         postgres_insert_query = """SELECT
-                                    trip_id, price 
+                                    trip_id, price, latitude, longitude, dest_latitude, dest_longitude
                                     FROM    TripsTable
                                     WHERE   driver_id IS NULL and
 									        status = 'waiting'
@@ -105,17 +185,41 @@ def search_trip_without_driver():
             cursor.close()
             conn.close()
             print("PostgreSQL connection is closed")
-
 #
-def register_driver(trip_id, driver_id: str):
+def update_pos(trip_id, driver_lat: float, driver_long: float):
+    try:
+        connection = get_con()
+        cursor = connection.cursor()
+        # Update single record now
+        sql_update_query = """UPDATE tripstable
+                                SET driver_longitude = '{1}',
+                                    driver_latitude = '{2}'
+                                WHERE trip_id = '{0}';""".format(trip_id, driver_long, driver_lat)
+        cursor.execute(sql_update_query)
+        
+        connection.commit()
+        
+        return cursor.statusmessage
+    except Exception as error:
+        print("Error in update operation", error)
+    finally:
+        # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+#
+def register_driver(trip_id, driver_id: str, driver_lat: float, driver_long: float):
     try:
         connection = get_con()
         cursor = connection.cursor()
         # Update single record now
         sql_update_query = """UPDATE tripstable
                                 SET driver_id = '{0}',
-	                                status = 'accepted'
-                                WHERE trip_id = '{1}' and status = 'waiting';""".format(driver_id,trip_id)
+	                                status = 'accepted',
+                                    driver_longitude = '{2}',
+                                    driver_latitude = '{3}'
+                                WHERE trip_id = '{1}' and status = 'waiting';""".format(driver_id,trip_id, driver_long, driver_lat)
         cursor.execute(sql_update_query)
         
         connection.commit()

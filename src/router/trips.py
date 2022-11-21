@@ -2,7 +2,7 @@
 from unittest import result
 from fastapi import APIRouter 
 #Our imports
-from src.repository.trips_bbdd import bd_connection, get_driver,register_trip,check,register_driver, search_trip_without_driver
+from src.repository.trips_bbdd import *
 
 # Define constants
 PRICE_PER_KILOMETER = 5
@@ -11,7 +11,6 @@ PRICE_PER_KILOMETER = 5
 client_id = "soyuncliente1234"
 
 router = APIRouter()
-
 
 @router.get("/")
 async def main_route():
@@ -27,20 +26,21 @@ async def price_calculator(distance: float):
 #When a Client accept the travel´s price, we save the travel ID
 #in a postgreSQL database waiting for a driver
 @router.post("/accept-client-trip")
-async def accept_client_trip(client_id: str, price: float):
-    operation = register_trip(client_id, price)
+async def accept_client_trip(client_id: str, price: float,user_lat: float,user_long: float,dest_lat: float, dest_long: float):
+    operation = register_trip(client_id, price, user_lat,user_long,dest_lat, dest_long)
     return {"trip_id": operation} 
 
 #If a driver is looking for doing a trip
 @router.get("/search-trip")
 async def search_trip():
     operation = search_trip_without_driver()
-    return {"trip_id": operation[0], "price": operation[1]}
+    return {"trip_id": operation[0], "trip_price": operation[1], "lat": operation[2], "long": operation[3],\
+        "dest_lat": operation[4], "dest_long": operation[5]}
 
 #If a driver is looking for accept a trip
 @router.post("/accept-driver-trip")
-async def accept_driver_trip(trip_id, driver_id: str):
-    record = register_driver(trip_id, driver_id)
+async def accept_driver_trip(trip_id, driver_id: str, driver_lat: float, driver_long: float):
+    record = register_driver(trip_id, driver_id, driver_lat, driver_long)
     return {"status": record}
 
 #If a client answer about a driver was found
@@ -54,3 +54,26 @@ async def check_driver_status(trip_id):
 async def check_database():
     check()
     return {}
+
+#A driver needs to update his position
+@router.put("/driver/position")
+async def update_position(trip_id, driver_lat: float, driver_long: float):
+    row_updated = update_pos(trip_id, driver_lat, driver_long)
+    return {"updated": row_updated}
+
+# A client looking for driver position
+@router.get("/trip-driver-position")
+async def get_driver_position(trip_id):
+    position = get_driver_pos(trip_id)
+    return {"position_lat": position[0][0],"position_long": position[1][0]}
+
+#A client want trip status = "Running" or "waiting" (for driver)
+@router.get("/trip")
+async def get_trip(trip_id):
+    return {"trip_status": get_trip_status(trip_id)}
+
+# Init a Trip by setting status on "Running" from driver device
+@router.put("/init")
+async def init(trip_id):
+    result = init_trip(trip_id)
+    return {"trip_updated_to": result}
