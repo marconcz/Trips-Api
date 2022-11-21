@@ -123,7 +123,7 @@ def get_driver_pos(trip_id):
         postgres_select_query = """SELECT driver_longitude FROM TripsTable\
                                     WHERE trip_id={0};""".format(trip_id)
         cursor.execute(postgres_select_query)
-        result.append
+        result.append(cursor.fetchone())
 
     except Exception as error:
         print("Error:",error)
