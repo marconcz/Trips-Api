@@ -19,7 +19,7 @@ def bd_connection():
         # Creating table as per requirement
         sql = '''CREATE TABLE IF NOT EXISTS TRIPSTABLE(TRIP_ID SERIAL PRIMARY KEY,
 										DRIVER_ID VARCHAR(255),
-										CLIENT_ID VARCHAR(255) UNIQUE NOT NULL,
+										CLIENT_ID VARCHAR(255) NOT NULL,
 									    PRICE NUMERIC,
                                         STATUS VARCHAR(20),
                                         LONGITUDE FLOAT,
@@ -27,7 +27,9 @@ def bd_connection():
                                         DEST_LONGITUDE FLOAT,
                                         DEST_LATITUDE FLOAT,
                                         DRIVER_LONGITUDE FLOAT,
-                                        DRIVER_LATITUDE FLOAT)'''
+                                        DRIVER_LATITUDE FLOAT,
+                                        DRIVER_SCORE INTEGER check (DRIVER_SCORE BETWEEN  1 and 5),
+                                        CLIENT_SCORE INTEGER check (CLIENT_SCORE BETWEEN  1 and 5)'''
         cursor.execute(sql)
         print("Table created successfully........")
         conn.commit()
@@ -39,6 +41,28 @@ def bd_connection():
         #print("Connection with Heroku_DDBB is OK")
     except Exception as error:
         print(error)
+
+#When a driver complete a trip it marks its trip id completed
+def trip_completed(trip_id):
+    try:
+        conn = get_con()
+        cursor = conn.cursor()
+
+        sql = """UPDATE tripstable
+                    SET status = 'completed'
+                    WHERE trip_id = '{0}' and status = 'running';""".format(trip_id)
+        cursor.execute(sql)
+        conn.commit()
+        result = cursor.statusmessage
+        if (result == "UPDATE 1"):
+            result = "completed"
+        else:
+            result = "Failed updating"
+
+        return result
+    except Exception as error:
+        print(error)
+
 # init a trip setting its status to Running
 def init_trip(trip_id):
     try:
@@ -48,7 +72,7 @@ def init_trip(trip_id):
         # Creating table as per requirement
         sql = """UPDATE tripstable
                             SET status = 'running'
-                            WHERE trip_id = '{0}';""".format(trip_id)
+                            WHERE trip_id = '{0}' and status = 'accepted';""".format(trip_id)
         cursor.execute(sql)
         conn.commit()
         result = cursor.statusmessage
@@ -87,6 +111,12 @@ def register_trip(client_id: str, price: float, user_lat: float, user_long: floa
         conn = get_con()
         cursor = conn.cursor()
 
+        postgres_search_client_trips_query = """SELECT * FROM Tripstable\
+                                                WHERE client_id='{0}' and
+                                                      status<>'completed';""".format(client_id)
+        cursor.execute(postgres_search_client_trips_query)
+        if cursor.rowcount > 0:
+            return "User have other trips waiting or in progress"
         postgres_insert_query = """INSERT INTO TripsTable(trip_id,\
                                                             client_id,\
                                                             price,\
@@ -162,7 +192,7 @@ def get_driver(trip_id):
             print("PostgreSQL connection is closed")
         return result
 #
-def search_trip_without_driver():
+def search_trip_without_driver(trip_id):
     try:
         conn = get_con()
         cursor = conn.cursor()
@@ -171,8 +201,9 @@ def search_trip_without_driver():
                                     trip_id, price, latitude, longitude, dest_latitude, dest_longitude
                                     FROM    TripsTable
                                     WHERE   driver_id IS NULL and
-									        status = 'waiting'
-                                    LIMIT 1;"""
+									        status = 'waiting' and
+                                            trip_id <> {0}
+                                    LIMIT 1;""".format(trip_id)
         cursor.execute(postgres_insert_query)
         conn.commit()
         return cursor.fetchone() #Return 1 row in cursor rows
@@ -254,6 +285,84 @@ def check():
         print("Error while fetching data from PostgreSQL", error)
     finally:
     # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+def trip_qualify(trip_id, user_id, score):
+    try:
+        connection = get_con()
+        cursor = connection.cursor()
+        # search trip
+        postgres_select_query = """SELECT
+                                    driver_id, client_id, driver_score, client_score
+                                    FROM    TripsTable
+                                    WHERE   trip_id = {0} and status = 'completed';""".format(trip_id)
+        cursor.execute(postgres_select_query)
+        row = cursor.fetchone()
+        print(row)
+        if (row[0] == user_id and (row[3] is None)):
+            user_qualified = "client_score"
+        elif(row[1] == user_id and (row[2] is None)):
+            user_qualified = "driver_score"
+        else:
+            return 'failed: score can not be overwrited'
+        print(user_qualified)
+        sql_update_query = """UPDATE tripstable
+                                SET {0} = '{2}'
+                                WHERE trip_id = '{1}' and status = 'completed';""".format(user_qualified, trip_id, score)
+        print(sql_update_query)
+        cursor.execute(sql_update_query)
+
+        result = 'failed'
+        if (cursor.rowcount == 1):
+            result = 'updated'
+        connection.commit()
+
+
+        return result
+    except Exception as error:
+        print("Error in update operation", error)
+    finally:
+        # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+def get_score_average(user_id):
+    try:
+        connection = get_con()
+        cursor = connection.cursor()    
+        postgres_select_query = """SELECT driver_id, client_id 
+                                    FROM tripstable
+                                    WHERE (driver_id = '{0}' or client_id = '{0}')
+                                          and status = 'completed'
+                                    LIMIT 1;""".format(user_id)
+        cursor.execute(postgres_select_query)
+        row = cursor.fetchone()
+
+        if (row[1] == user_id):
+            user_score = "client_score"
+            user_type = "client_id"
+        elif(row[0] == user_id):
+            user_score = "driver_score"
+            user_type = "driver_id"
+        else:
+            return 0
+
+        postgres_average_query = """SELECT AVG({0})
+                                    FROM tripstable
+                                    WHERE {1} = '{2}';""".format(user_score, user_type, user_id)
+        cursor.execute(postgres_average_query)
+        
+        return cursor.fetchone()[0]
+
+
+    except Exception as error:
+        print("Error in select operation", error)
+    finally:
+        # closing database connection.
         if connection:
             cursor.close()
             connection.close()

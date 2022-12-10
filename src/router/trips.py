@@ -31,9 +31,9 @@ async def accept_client_trip(client_id: str, price: float,user_lat: float,user_l
     return {"trip_id": operation} 
 
 #If a driver is looking for doing a trip
-@router.get("/search-trip")
-async def search_trip():
-    operation = search_trip_without_driver()
+@router.get("/search-trip/{trip_id}")
+async def search_trip(trip_id):
+    operation = search_trip_without_driver(trip_id)
     return {"trip_id": operation[0], "trip_price": operation[1], "lat": operation[2], "long": operation[3],\
         "dest_lat": operation[4], "dest_long": operation[5]}
 
@@ -77,3 +77,20 @@ async def get_trip(trip_id):
 async def init(trip_id):
     result = init_trip(trip_id)
     return {"trip_updated_to": result}
+
+#If a client answer about a driver was found
+@router.post("/trip/finish/{trip_id}")
+async def finish_trip(trip_id):
+    record = trip_completed(trip_id)
+    return {"trip_status": record}
+
+#Qualify: A user wants qualify a trip
+@router.post("/trip/{trip_id}/qualify/{user_id}/score/{score}")
+async def trip_qualification(trip_id, user_id, score):
+    record = trip_qualify(trip_id, user_id, score)
+    return {"status": record}
+
+#Return score average
+@router.get("/score/{user_id}")
+async def get_score(user_id):
+    return {"score": get_score_average(user_id)}
