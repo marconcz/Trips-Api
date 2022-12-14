@@ -26,16 +26,19 @@ async def price_calculator(distance: float):
 #When a Client accept the travel´s price, we save the travel ID
 #in a postgreSQL database waiting for a driver
 @router.post("/accept-client-trip")
-async def accept_client_trip(client_id: str, price: float,user_lat: float,user_long: float,dest_lat: float, dest_long: float):
-    operation = register_trip(client_id, price, user_lat,user_long,dest_lat, dest_long)
+async def accept_client_trip(client_id: str, price: float,user_lat: float,user_long: float,dest_lat: float, dest_long: float, starting_name: str, destination_name: str):
+    operation = register_trip(client_id, price, user_lat,user_long,dest_lat, dest_long, starting_name, destination_name)
     return {"trip_id": operation} 
 
 #If a driver is looking for doing a trip
 @router.get("/search-trip/{trip_id}")
 async def search_trip(trip_id):
     operation = search_trip_without_driver(trip_id)
-    return {"trip_id": operation[0], "trip_price": operation[1], "lat": operation[2], "long": operation[3],\
-        "dest_lat": operation[4], "dest_long": operation[5]}
+    if (operation != "Failed: No trips available to do"): #Failed searching a trip (no one available)
+        return {"trip_id": operation[0], "trip_price": operation[1], "lat": operation[2], "long": operation[3],\
+            "dest_lat": operation[4], "dest_long": operation[5]}
+    else:
+        return {'status': operation}
 
 #If a driver is looking for accept a trip
 @router.post("/accept-driver-trip")
@@ -94,3 +97,12 @@ async def trip_qualification(trip_id, user_id, score):
 @router.get("/score/{user_id}")
 async def get_score(user_id):
     return {"score": get_score_average(user_id)}
+
+#Return last user trips
+@router.get("/trips/history/{user_id}")
+async def get_history(user_id):
+    return {"history": get_trip_history(user_id)}
+
+@router.psot("trip/canceled/{trip_id}")
+async def calcel_trip(trip_id):
+    return {"status": cancel_a_trip(trip_id)}
