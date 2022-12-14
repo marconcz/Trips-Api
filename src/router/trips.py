@@ -103,6 +103,6 @@ async def get_score(user_id):
 async def get_history(user_id):
     return {"history": get_trip_history(user_id)}
 
-@router.post("trip/canceled/{trip_id}")
+@router.post("/trip/canceled/{trip_id}")
 async def calcel_trip(trip_id):
     return {"status": cancel_a_trip(trip_id)}

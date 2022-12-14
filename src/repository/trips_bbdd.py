@@ -406,15 +406,15 @@ def cancel_a_trip(trip_id):
     try:
         connection = get_con()
         cursor = connection.cursor()    
-        postgres_select_query = """DELETE FROM tripstable
-                                     WHERE trip_id ='{0}' 
+        postgres_delete_query = """DELETE FROM tripstable
+                                     WHERE trip_id = '{0}' 
                                      and status = 'waiting';""".format(trip_id)
-        cursor.execute(postgres_select_query)
-
-        if (cursor.rowcount >= 1):
-            return cursor.fetchall()
+        cursor.execute(postgres_delete_query)
+        if (cursor.statusmessage == "DELETE 1"):
+            connection.commit()
+            return "deleted"
         else:
-            return None
+            return "Trips does not exist"
 
     except Exception as error:
         print("Error in SQL operation", error)
