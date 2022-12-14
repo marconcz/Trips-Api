@@ -29,7 +29,9 @@ def bd_connection():
                                         DRIVER_LONGITUDE FLOAT,
                                         DRIVER_LATITUDE FLOAT,
                                         DRIVER_SCORE INTEGER check (DRIVER_SCORE BETWEEN  1 and 5),
-                                        CLIENT_SCORE INTEGER check (CLIENT_SCORE BETWEEN  1 and 5)'''
+                                        CLIENT_SCORE INTEGER check (CLIENT_SCORE BETWEEN  1 and 5),
+                                        STARTING_POINT VARCHAR(100),
+                                        DESTINATION_POINT VARCHAR(100))'''
         cursor.execute(sql)
         print("Table created successfully........")
         conn.commit()
@@ -106,7 +108,7 @@ def get_trip_status(trip_id):
     except Exception as error:
         print(error)
 #Register a trip with a client when trip´s accepted, without driver
-def register_trip(client_id: str, price: float, user_lat: float, user_long: float, dest_lat: float, dest_long: float):
+def register_trip(client_id: str, price: float, user_lat: float, user_long: float, dest_lat: float, dest_long: float, starting: str, destination: str):
     try:
         conn = get_con()
         cursor = conn.cursor()
@@ -124,9 +126,11 @@ def register_trip(client_id: str, price: float, user_lat: float, user_long: floa
                                                             latitude,\
                                                             longitude,\
                                                             dest_latitude,\
-                                                            dest_longitude)\
-                                VALUES(DEFAULT,'{0}','{1}','waiting','{2}','{3}','{4}','{5}')\
-                                RETURNING trip_id;""".format(client_id,price,user_lat,user_long,dest_lat,dest_long)
+                                                            dest_longitude,\
+                                                            starting_point,\
+                                                            destination_point)\
+                                VALUES(DEFAULT,'{0}','{1}','waiting','{2}','{3}','{4}','{5}','{6}','{7}')\
+                                RETURNING trip_id;""".format(client_id,price,user_lat,user_long,dest_lat,dest_long,starting,destination)
         cursor.execute(postgres_insert_query)
         conn.commit()
         trip_id = cursor.fetchone()[0]
@@ -206,7 +210,11 @@ def search_trip_without_driver(trip_id):
                                     LIMIT 1;""".format(trip_id)
         cursor.execute(postgres_insert_query)
         conn.commit()
-        return cursor.fetchone() #Return 1 row in cursor rows
+        result = cursor.fetchone()
+        if (cursor.rowcount == 1):
+            return result #Return 1 row in cursor rows
+        else:
+            return "Failed: No trips available to do"
     except Exception as error:
         print("Error:",error)
         return "An error occurred"
@@ -361,6 +369,55 @@ def get_score_average(user_id):
 
     except Exception as error:
         print("Error in select operation", error)
+    finally:
+        # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+def get_trip_history(user_id):
+    try:
+        connection = get_con()
+        cursor = connection.cursor()    
+        postgres_select_query = """SELECT (starting_point, destination_point)
+                                    FROM tripstable
+                                    WHERE client_id = '{0}'
+                                          and status = 'completed'
+                                    ORDER BY trip_id
+                                    LIMIT 5;""".format(user_id)
+        cursor.execute(postgres_select_query)
+
+        if (cursor.rowcount >= 1):
+            return cursor.fetchall()
+        else:
+            return None
+
+    except Exception as error:
+        print("Error in select operation", error)
+    finally:
+        # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
+def cancel_a_trip(trip_id):
+    try:
+        connection = get_con()
+        cursor = connection.cursor()    
+        postgres_select_query = """DELETE FROM tripstable
+                                     WHERE trip_id ='{0}' 
+                                     and status = 'waiting';""".format(trip_id)
+        cursor.execute(postgres_select_query)
+
+        if (cursor.rowcount >= 1):
+            return cursor.fetchall()
+        else:
+            return None
+
+    except Exception as error:
+        print("Error in SQL operation", error)
     finally:
         # closing database connection.
         if connection:
