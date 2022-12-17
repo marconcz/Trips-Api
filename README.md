@@ -1,33 +1,43 @@
 # Trips-API
 Servicios de viaje para la aplicación.
 
-**Instalar poetry**
+**Installation**
 1. curl -sSL https://install.python-poetry.org | python3 -
 2. Agregar a env var PATH del OS
 
-**Instalar dependencias**
+**Dependencies**
 1. poetry config virtualenvs.in-project true
 2. poetry install
 
 ## Scripts
-**Levantar servidor**
+**Run server**
 - poetry run start
 
-**Ejecutar pruebas**
+**Execute test**
 - poetry run test
 
-**Ejecutar linter**
+**Execute Linter**
 - poetry run lint
 
-**Revisar formateo del codigo codigo**
+**Formatting code**
 - poetry run format
 
-**Refactorizar el codigo**
-- poetry run reformat
+### Deploy
 
-# ---------------CORRER CON DOCKER---------------- #
-**Parado en el directorio trips-api : Crear imagen con docker**
-- docker build . -t python-image
+The pipeline deploys the server automatically on pushing to **master**
 
-**Correr imagen de docker y abrir consola.**
-- docker run -i -t python-image /bin/bash
+You should create the app on heroku first
+
+You'll need to set the following actions secrets:
+
+- `HEROKU_NAME`: App name
+- `HEROKU_EMAIL`: Account email
+- `HEROKU_API_KEY`: Account API key
+
+
+# ---------------RUN WITH DOCKER---------------- #
+**docker build . -t python-image**
+
+**docker run -t python-image**
+
+
