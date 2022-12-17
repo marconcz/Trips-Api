@@ -1,9 +1,9 @@
 # Trips-API
-Servicios de viaje para la aplicación.
+Trips services for Fiuber App
 
 **Installation**
 1. curl -sSL https://install.python-poetry.org | python3 -
-2. Agregar a env var PATH del OS
+2. Add env var PATH
 
 **Dependencies**
 1. poetry config virtualenvs.in-project true
